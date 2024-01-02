@@ -60,7 +60,7 @@ import { AppointmentService } from 'src/app/services/appointment.service';
     }
     
     .fc { /* the calendar root */
-      max-width: 1100px;
+      max-width: 1000px;
       margin: 0 auto;
     }
     `]
@@ -100,7 +100,7 @@ export class CalendarComponent {
     plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     headerToolbar: {
       left: '',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+      right: '',
     },
     initialView: 'dayGridMonth',
     initialEvents: [],
@@ -122,19 +122,19 @@ export class CalendarComponent {
 
   ngOnInit() {
     this.addAllAppointments();
-    this.updateCalendarView();
+    // this.updateCalendarView();
   }
 
   ngAfterViewInit() {
     this.updateCalendarView();
   }
 
-  onViewChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    const view = selectElement.value;
-    const calendarApi = this.fullCalendar.getApi();
-    calendarApi.changeView(view);
-  }
+  // onViewChange(event: Event) {
+  //   const selectElement = event.target as HTMLSelectElement;
+  //   const view = selectElement.value;
+  //   const calendarApi = this.fullCalendar.getApi();
+  //   calendarApi.changeView(view);
+  // }
 
   updateCalendarView() {
     const calendarApi = this.fullCalendar.getApi();
@@ -195,11 +195,11 @@ export class CalendarComponent {
       end: selectInfo.endStr,
       allDay: selectInfo.allDay,
     };
-    this.toggleShowModal();
+    // this.toggleShowModal();
   }
 
   addNewAppointment(appointment: Appointment) {
-    const calendarApi = this.calendarApi;
+    const calendarApi = this.fullCalendar.getApi();
     calendarApi.addEvent({
       title: appointment.name,
       start: appointment.start,
