@@ -1,9 +1,15 @@
-import { Component, signal, ChangeDetectorRef } from '@angular/core';
-import { CalendarOptions, DateSelectArg, EventClickArg, EventApi } from '@fullcalendar/core';
+import { Component, signal, ChangeDetectorRef, ViewChild } from '@angular/core';
+import {
+  CalendarOptions,
+  DateSelectArg,
+  EventClickArg,
+  EventApi,
+} from '@fullcalendar/core';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
+import { FullCalendarComponent } from '@fullcalendar/angular';
 
 @Component({
   selector: 'app-calendar',
@@ -52,47 +58,82 @@ import listPlugin from '@fullcalendar/list';
     }
     
     .fc { /* the calendar root */
-      max-width: 1100px;
+      max-width: 1000px;
       margin: 0 auto;
     }
-    `
-    
-  ]
+    `]
 })
 export class CalendarComponent {
+  showModal: boolean = false;
+  showDetailsModal: boolean = false;
+  selectedAppointmentId: string = '';
+  selectedAppointment: any;
   calendarVisible = signal(true);
+  monthList: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+  monthListInWords: string[] = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  yearRange: number[] = [2019, 2020, 2021, 2022, 2023, 2024];
+  selectedMonth: number = new Date().getMonth();
+  selectedYear: number = new Date().getFullYear();
+  @ViewChild('fullCalendar') fullCalendar!: FullCalendarComponent;
   calendarOptions = signal<CalendarOptions>({
-    plugins: [
-      interactionPlugin,
-      dayGridPlugin,
-      timeGridPlugin,
-      listPlugin,
-    ],
+    plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin],
     headerToolbar: {
-      left: 'prev,next today',
-      center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+      left: '',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
     },
     initialView: 'dayGridMonth',
-    initialEvents: [], // alternatively, use the `events` setting to fetch from a feed
+    initialEvents: [],
     weekends: true,
     editable: true,
     selectable: true,
     selectMirror: true,
     dayMaxEvents: true,
-    select: this.handleDateSelect.bind(this),
-    eventClick: this.handleEventClick.bind(this),
-    eventsSet: this.handleEvents.bind(this)
-    /* you can update a remote database when these fire:
-    eventAdd:
-    eventChange:
-    eventRemove:
-    */
+    eventsSet: this.handleEvents.bind(this),
   });
   currentEvents = signal<EventApi[]>([]);
 
-  constructor(private changeDetector: ChangeDetectorRef) {
+  constructor(
+    private changeDetector: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit() {
+    this.updateCalendarView();
   }
+
+  ngAfterViewInit() {
+    this.updateCalendarView();
+  }
+
+  onViewChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    const view = selectElement.value;
+    const calendarApi = this.fullCalendar.getApi();
+    calendarApi.changeView(view);
+  }
+
+  updateCalendarView() {
+    const calendarApi = this.fullCalendar.getApi();
+    if (calendarApi) {
+      const date = new Date(this.selectedYear, this.selectedMonth);
+      calendarApi.gotoDate(date);
+    }
+  }
+
+  onMonthChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedMonth = parseInt(selectElement.value, 10);
+    this.updateCalendarView();
+  }
+
+  onYearChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedYear = parseInt(selectElement.value, 10);
+    this.updateCalendarView();
+  }
+
 
   handleCalendarToggle() {
     this.calendarVisible.update((bool) => !bool);
@@ -104,32 +145,8 @@ export class CalendarComponent {
     });
   }
 
-  handleDateSelect(selectInfo: DateSelectArg) {
-    const title = prompt('Please enter a new title for your event');
-    const calendarApi = selectInfo.view.calendar;
-
-    calendarApi.unselect(); // clear date selection
-
-    if (title) {
-      calendarApi.addEvent({
-        id: '1',
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay
-      });
-    }
-  }
-
-  handleEventClick(clickInfo: EventClickArg) {
-    if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-      clickInfo.event.remove();
-    }
-  }
-
   handleEvents(events: EventApi[]) {
     this.currentEvents.set(events);
-    this.changeDetector.detectChanges(); // workaround for pressionChangedAfterItHasBeenCheckedError
+    this.changeDetector.detectChanges();
   }
-
 }
