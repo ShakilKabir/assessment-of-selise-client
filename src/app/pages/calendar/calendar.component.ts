@@ -109,7 +109,8 @@ export class CalendarComponent {
     selectable: true,
     selectMirror: true,
     dayMaxEvents: true,
-    // eventClick: this.handleEventClick.bind(this),
+    select: this.onDateSelect.bind(this),
+    eventClick: this.handleEventClick.bind(this),
     eventsSet: this.handleEvents.bind(this),
   });
   currentEvents = signal<EventApi[]>([]);
@@ -159,6 +160,15 @@ export class CalendarComponent {
     this.showModal = !this.showModal;
   }
 
+  toggleShowDetails() {
+    this.showDetailsModal = !this.showDetailsModal;
+  }
+
+  deleteAppointment() {
+    this.selectedAppointment.remove();
+    this.selectedAppointmentId = '';
+  }
+
   openNewAppointmentModal() {
     this.selectedDateInfo = {
       start: '',
@@ -176,6 +186,16 @@ export class CalendarComponent {
     this.calendarOptions.mutate((options) => {
       options.weekends = !options.weekends;
     });
+  }
+
+  onDateSelect(selectInfo: DateSelectArg) {
+    this.calendarApi = selectInfo.view.calendar;
+    this.selectedDateInfo = {
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      allDay: selectInfo.allDay,
+    };
+    this.toggleShowModal();
   }
 
   addNewAppointment(appointment: Appointment) {
@@ -210,10 +230,18 @@ export class CalendarComponent {
           };
         });
       },
-      (err: any) => {
+      (err) => {
         console.log(err);
       }
     );
+  }
+
+  handleEventClick(clickInfo: EventClickArg) {
+    console.log(clickInfo.event);
+    console.log(clickInfo.event.id);
+    this.selectedAppointment = clickInfo.event;
+    this.selectedAppointmentId = clickInfo.event.id;
+    this.toggleShowDetails();
   }
 
   handleEvents(events: EventApi[]) {

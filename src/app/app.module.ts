@@ -9,6 +9,7 @@ import { CalendarComponent } from './pages/calendar/calendar.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppointmentFormComponent } from './components/appointment-form/appointment-form.component';
+import { AppointmentDetailsComponent } from './components/appointment-details/appointment-details.component';
 
 
 
@@ -17,7 +18,8 @@ import { AppointmentFormComponent } from './components/appointment-form/appointm
     AppComponent,
     LandingComponent,
     CalendarComponent,
-    AppointmentFormComponent
+    AppointmentFormComponent,
+    AppointmentDetailsComponent
   ],
   imports: [
     BrowserModule,
