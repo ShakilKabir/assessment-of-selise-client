@@ -7,7 +7,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { LandingComponent } from './pages/landing/landing.component';
 import { CalendarComponent } from './pages/calendar/calendar.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppointmentFormComponent } from './components/appointment-form/appointment-form.component';
 
 
@@ -24,7 +24,8 @@ import { AppointmentFormComponent } from './components/appointment-form/appointm
     AppRoutingModule,
     HttpClientModule,
     FullCalendarModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -10,6 +10,8 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import { FullCalendarComponent } from '@fullcalendar/angular';
+import { Appointment } from 'src/app/types/appointment';
+import { AppointmentService } from 'src/app/services/appointment.service';
 
 @Component({
   selector: 'app-calendar',
@@ -58,12 +60,18 @@ import { FullCalendarComponent } from '@fullcalendar/angular';
     }
     
     .fc { /* the calendar root */
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
     }
     `]
 })
 export class CalendarComponent {
+  selectedDateInfo: { start: string; end: string; allDay: boolean } = {
+    start: '',
+    end: '',
+    allDay: false,
+  };
+  calendarApi: any;
   showModal: boolean = false;
   showDetailsModal: boolean = false;
   selectedAppointmentId: string = '';
@@ -71,8 +79,18 @@ export class CalendarComponent {
   calendarVisible = signal(true);
   monthList: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
   monthListInWords: string[] = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   yearRange: number[] = [2019, 2020, 2021, 2022, 2023, 2024];
   selectedMonth: number = new Date().getMonth();
@@ -91,15 +109,18 @@ export class CalendarComponent {
     selectable: true,
     selectMirror: true,
     dayMaxEvents: true,
+    // eventClick: this.handleEventClick.bind(this),
     eventsSet: this.handleEvents.bind(this),
   });
   currentEvents = signal<EventApi[]>([]);
 
   constructor(
     private changeDetector: ChangeDetectorRef,
+    private appointmentService: AppointmentService
   ) {}
 
   ngOnInit() {
+    this.addAllAppointments();
     this.updateCalendarView();
   }
 
@@ -134,6 +155,18 @@ export class CalendarComponent {
     this.updateCalendarView();
   }
 
+  toggleShowModal() {
+    this.showModal = !this.showModal;
+  }
+
+  openNewAppointmentModal() {
+    this.selectedDateInfo = {
+      start: '',
+      end: '',
+      allDay: false,
+    };
+    this.toggleShowModal();
+  }
 
   handleCalendarToggle() {
     this.calendarVisible.update((bool) => !bool);
@@ -143,6 +176,44 @@ export class CalendarComponent {
     this.calendarOptions.mutate((options) => {
       options.weekends = !options.weekends;
     });
+  }
+
+  addNewAppointment(appointment: Appointment) {
+    const calendarApi = this.calendarApi;
+    calendarApi.addEvent({
+      title: appointment.name,
+      start: appointment.start,
+      end: appointment.end,
+      allDay: appointment.allDay,
+      id: appointment.id,
+    });
+  }
+
+  addAllAppointments() {
+    this.appointmentService.getAllAppointments().subscribe(
+      (appointments: Appointment[]) => {
+        const events = appointments.map((appointment) => {
+          return {
+            title: appointment.name,
+            start: appointment.start,
+            end: appointment.end,
+            allDay: appointment.allDay,
+            id: appointment.id,
+          };
+        });
+        console.log(events);
+
+        this.calendarOptions.update((options) => {
+          return {
+            ...options,
+            events: events,
+          };
+        });
+      },
+      (err: any) => {
+        console.log(err);
+      }
+    );
   }
 
   handleEvents(events: EventApi[]) {

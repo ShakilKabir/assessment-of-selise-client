@@ -4,7 +4,6 @@ export interface Appointment {
     age: number;
     start: string;
     end: string;
-    title: string;
     allDay: boolean;
     id: string;
 }
