@@ -122,19 +122,12 @@ export class CalendarComponent {
 
   ngOnInit() {
     this.addAllAppointments();
-    // this.updateCalendarView();
+    this.updateCalendarView();
   }
 
   ngAfterViewInit() {
     this.updateCalendarView();
   }
-
-  // onViewChange(event: Event) {
-  //   const selectElement = event.target as HTMLSelectElement;
-  //   const view = selectElement.value;
-  //   const calendarApi = this.fullCalendar.getApi();
-  //   calendarApi.changeView(view);
-  // }
 
   updateCalendarView() {
     const calendarApi = this.fullCalendar.getApi();
